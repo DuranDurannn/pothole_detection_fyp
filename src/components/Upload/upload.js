@@ -84,7 +84,10 @@ clearSRTBtn.addEventListener("click", () => {
 });
 
 /* CONFIRM UPLOAD */
-confirmUploadBtn.addEventListener("click", () => {
+confirmUploadBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
   if (!videoFile || !srtFile) {
     alert("Please upload both a video and an SRT file!");
     return;
