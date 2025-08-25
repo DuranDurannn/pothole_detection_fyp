@@ -1,0 +1,59 @@
+.upload-container {
+  display: flex;
+  flex: 1;
+  gap: 20px; 
+  justify-content: center; 
+  align-items: stretch; 
+  width: 100%;
+}
+
+.upload-area {
+  border: 2px dashed var(--border-color, #007bff);
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-color, #333);
+  background-color: var(--primary-bg, #f9f9f9);
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.upload-area.dragover {
+  border-color: #0056b3;
+  background-color: var(--secondary-bg, #e0e0e0);
+  color: #0056b3;
+}
+
+.upload-btn {
+  display: inline-block;
+  background-color: var(--btn-bg, #007bff);
+  color: var(--btn-text, #fff);
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s ease;
+  font-size: 16px;
+  text-decoration: none;
+}
+
+.upload-btn:hover {
+  background-color: var(--btn-hover, #0056b3);
+}
+
+.clear-btn {
+  display: inline-block;
+  background-color: var(--btn-bg, #ff0000);
+  color: var(--btn-text, #fff);
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s ease;
+  font-size: 16px;
+  text-decoration: none;
+}
+
+.clear-btn:hover {
+  background-color: var(--btn-hover, #9c0000);
+}

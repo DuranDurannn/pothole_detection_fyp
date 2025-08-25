@@ -1,0 +1,40 @@
+/* Card Styles */
+.card {
+  background: #fefefe;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  flex: 1; /* cards take equal space */
+  margin: 0 10px;
+  text-align: center;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: #333;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Hover effect */
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+/* Container for cards (topbar) */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 20px;
+}
+
+/* Responsive: Stack cards on smaller screens */
+@media (max-width: 768px) {
+  .topbar {
+    flex-direction: column;
+  }
+
+  .card {
+    margin: 10px 0;
+  }
+}

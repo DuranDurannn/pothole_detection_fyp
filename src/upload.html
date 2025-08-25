@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload - Pothole Detection</title>
+  <link rel="stylesheet" href="styles/global.css">
+  <link rel="stylesheet" href="components/Sidebar/sidebar.css">
+  <link rel="stylesheet" href="components/Upload/upload.css">
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <h2>POTHOLE DETECTION</h2>
+    <div class="menu">
+      <button onclick="location.href='dashboard.html'"><span>Dashboard</span></button>
+      <button onclick="location.href='upload.html'" class="active"><span>Upload</span></button>
+      <button onclick="location.href='history.html'"><span>History</span></button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+    <h1>Upload</h1>
+
+    <div class="upload-container">
+      <!-- Video Upload -->
+      <div class="upload-area" id="uploadAreaVideo">
+        Drag to upload video
+        <div style="margin-top: 10px;">
+          <input type="file" id="fileInputVideo" accept="video/*" style="display:none;" />
+        </div>
+      </div>
+      <div style="margin-top: 10px; padding-bottom: 10px;">
+        <button class="upload-btn" type="button" onclick="document.getElementById('fileInputVideo').click()">Upload Video</button>
+        <button id="clearVideo" class="clear-btn">Clear Video</button>
+      </div>
+
+      <!-- SRT Upload -->
+      <div class="upload-area" id="uploadAreaSRT">
+        Drag to upload SRT file
+        <div style="margin-top: 10px;">
+          <input type="file" id="fileInputSRT" accept=".srt,.txt" style="display:none;" />
+        </div>
+      </div>
+      <div style="margin-top: 10px; padding-bottom: 10px;">
+        <button class="upload-btn" type="button" onclick="document.getElementById('fileInputSRT').click()">Upload SRT</button>
+        <button id="clearSRT" class="clear-btn">Clear SRT</button>
+      </div>
+    </div>
+
+    <!-- Confirm Upload Button -->
+    <div style="text-align: center; margin-top: 40px;">
+      <button id="confirmUpload" class="upload-btn" type="button">Confirm Upload</button>
+    </div>
+  </div>
+
+  <script src="components/Upload/upload.js"></script>
+</body>
+</html>

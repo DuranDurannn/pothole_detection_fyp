@@ -1,0 +1,12 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+}
+
+/* Push content right when sidebar is visible */
+.main {
+  background-color: #ffffff;
+  padding: 20px;
+  flex: 1;
+}
