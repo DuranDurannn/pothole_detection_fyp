@@ -1,59 +1,78 @@
 .upload-container {
   display: flex;
-  flex: 1;
-  gap: 20px; 
-  justify-content: center; 
-  align-items: stretch; 
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
   width: 100%;
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 32px;
+  background: var(--primary-bg, #ffffff);
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease;
+}
+
+.upload-container:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
 .upload-area {
   border: 2px dashed var(--border-color, #007bff);
   border-radius: 12px;
-  padding: 40px;
+  padding: 32px 24px;
+  width: 100%;
   text-align: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--text-color, #333);
-  background-color: var(--primary-bg, #f9f9f9);
-  cursor: pointer;
-  transition: 0.3s ease;
+  background-color: var(--secondary-bg, #f5f7fa);
+  transition: all 0.3s ease;
 }
 
-.upload-area.dragover {
-  border-color: #0056b3;
-  background-color: var(--secondary-bg, #e0e0e0);
-  color: #0056b3;
+.upload-area:hover {
+  background-color: #eef5ff;
+  border-color: var(--btn-hover, #0056b3);
+  color: var(--btn-hover, #0056b3);
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.upload-btn,
+.clear-btn {
+  flex: 1;
+  text-align: center;
+  padding: 14px 0;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.3s ease;
 }
 
 .upload-btn {
-  display: inline-block;
   background-color: var(--btn-bg, #007bff);
   color: var(--btn-text, #fff);
-  padding: 12px 24px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.3s ease;
-  font-size: 16px;
-  text-decoration: none;
 }
 
 .upload-btn:hover {
   background-color: var(--btn-hover, #0056b3);
+  transform: translateY(-2px);
 }
 
 .clear-btn {
-  display: inline-block;
-  background-color: var(--btn-bg, #ff0000);
-  color: var(--btn-text, #fff);
-  padding: 12px 24px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.3s ease;
-  font-size: 16px;
-  text-decoration: none;
+  background-color: #dc3545;
+  color: #fff;
 }
 
 .clear-btn:hover {
-  background-color: var(--btn-hover, #9c0000);
+  background-color: #b02a37;
+  transform: translateY(-2px);
 }

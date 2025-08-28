@@ -21,37 +21,26 @@
 
   <!-- Main Content -->
   <div class="main">
-    <h1>Upload</h1>
+    <h1>Upload Video & SRT</h1>
 
     <div class="upload-container">
-      <!-- Video Upload -->
-      <div class="upload-area" id="uploadAreaVideo">
-        Drag to upload video
-        <div style="margin-top: 10px;">
-          <input type="file" id="fileInputVideo" accept="video/*" style="display:none;" />
-        </div>
-      </div>
-      <div style="margin-top: 10px; padding-bottom: 10px;">
-        <button class="upload-btn" type="button" onclick="document.getElementById('fileInputVideo').click()">Upload Video</button>
-        <button id="clearVideo" class="clear-btn" type="button">Clear Video</button>
+      <!-- File Inputs -->
+      <div class="upload-area">
+        <label for="videoFile">Choose a video:</label><br>
+        <input type="file" id="videoFile" name="videoFile" accept="video/*" required><br><br>
+
+        <label for="srtFile">Choose an SRT file:</label><br>
+        <input type="file" id="srtFile" name="srtFile" accept=".srt" required>
       </div>
 
-      <!-- SRT Upload -->
-      <div class="upload-area" id="uploadAreaSRT">
-        Drag to upload SRT file
-        <div style="margin-top: 10px;">
-          <input type="file" id="fileInputSRT" accept=".srt,.txt" style="display:none;" />
-        </div>
+      <!-- Buttons -->
+      <div class="button-group">
+        <button class="upload-btn" id="uploadBtn">Upload</button>
+        <button class="clear-btn" id="clearUpload">Clear</button>
       </div>
-      <div style="margin-top: 10px; padding-bottom: 10px;">
-        <button class="upload-btn" type="button" onclick="document.getElementById('fileInputSRT').click()">Upload SRT</button>
-        <button id="clearSRT" class="clear-btn" type="button">Clear SRT</button>
-      </div>
-    </div>
 
-    <!-- Confirm Upload Button -->
-    <div style="text-align: center; margin-top: 40px;">
-      <button id="confirmUpload" class="upload-btn" type="button">Confirm Upload</button>
+      <!-- Status -->
+      <div id="status"></div>
     </div>
   </div>
 

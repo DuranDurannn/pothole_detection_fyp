@@ -2,6 +2,7 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
   display: flex;
+  min-height: 100vh;
 }
 
 /* Push content right when sidebar is visible */
@@ -9,4 +10,46 @@ body {
   background-color: #ffffff;
   padding: 20px;
   flex: 1;
+  margin-left: 220px; 
+}
+
+/* analysis.html page */
+body.analysis-page .main {
+  display: flex;
+  flex-direction: column;  /* stack map and list downward */
+}
+
+.analysis-container {
+  display: flex;
+  gap: 20px; /* space between left and right */
+}
+
+/* Left side: video + map stacked */
+.left-section {
+  flex: 2;                /* take more space */
+  display: flex;
+  flex-direction: column; /* stack video on top of map */
+  gap: 20px;
+}
+
+.left-section video {
+  width: 100%;            /* make video responsive */
+  max-height: 300px;
+}
+
+/* Right side: list */
+.list-section {
+  flex: 1;                 /* take less space */
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  overflow-y: auto;         /* scroll if list grows long */
+  max-height: 720px;        /* adjust to match video+map height */
+}
+
+video {
+  border: 1px solid #ccc;  /* thin light gray border */
+  border-radius: 6px;      /* optional: rounded corners */
+  display: block;
+  max-width: 100%;
 }

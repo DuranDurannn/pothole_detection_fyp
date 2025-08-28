@@ -1,113 +1,75 @@
-const uploadAreaVideo = document.getElementById("uploadAreaVideo");
-const uploadAreaSRT = document.getElementById("uploadAreaSRT");
-const fileInputVideo = document.getElementById("fileInputVideo");
-const fileInputSRT = document.getElementById("fileInputSRT");
-const confirmUploadBtn = document.getElementById("confirmUpload");
-const clearVideoBtn = document.getElementById("clearVideo");
-const clearSRTBtn = document.getElementById("clearSRT");
+const videoInput = document.getElementById("videoFile");
+const srtInput = document.getElementById("srtFile");
+const uploadBtn = document.getElementById("uploadBtn");
+const clearBtn = document.getElementById("clearUpload");
+const statusDiv = document.getElementById("status");
 
-let videoFile = null;
-let srtFile = null;
+let selectedVideo = null;
+let selectedSrt = null;
 
-/* DRAG & DROP HELPERS */
-function setupDragAndDrop(area, handler) {
-  area.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    area.classList.add("dragover");
-  });
+// File selection
+videoInput.addEventListener("change", () => {
+  selectedVideo = videoInput.files[0];
+  updateStatus();
+});
 
-  area.addEventListener("dragleave", () => {
-    area.classList.remove("dragover");
-  });
+srtInput.addEventListener("change", () => {
+  selectedSrt = srtInput.files[0];
+  updateStatus();
+});
 
-  area.addEventListener("drop", (e) => {
-    e.preventDefault();
-    area.classList.remove("dragover");
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      handler(files[0]);
-    }
-  });
+function updateStatus() {
+  let msg = "";
+  if (selectedVideo) msg += `${selectedVideo.name}`;
+  if (selectedSrt) msg += ` | ${selectedSrt.name}`;
+  statusDiv.textContent = msg || "No files selected.";
 }
 
-/* VIDEO HANDLING */
-function handleVideo(file) {
-  if (!file.type.startsWith("video/")) {
-    uploadAreaVideo.innerHTML = `<p style="color:red;">Unsupported file type: ${file.type}</p>`;
-    return;
-  }
-  videoFile = file;
-  uploadAreaVideo.innerHTML = "";
-  const video = document.createElement("video");
-  video.src = URL.createObjectURL(file);
-  video.controls = true;
-  video.style.maxWidth = "100%";
-  video.style.maxHeight = "300px";
-  video.style.borderRadius = "10px";
-  uploadAreaVideo.appendChild(video);
-}
+// Upload button
+uploadBtn.addEventListener("click", async (e) => {
+  e.preventDefault(); // prevent page refresh
 
-fileInputVideo.addEventListener("change", () => {
-  if (fileInputVideo.files.length > 0) {
-    handleVideo(fileInputVideo.files[0]);
-  }
-});
-
-setupDragAndDrop(uploadAreaVideo, handleVideo);
-
-clearVideoBtn.addEventListener("click", () => {
-  videoFile = null;
-  uploadAreaVideo.innerHTML = "Drag to upload video";
-});
-
-/* SRT HANDLING */
-function handleSRT(file) {
-  if (!(file.name.endsWith(".srt") || file.name.endsWith(".txt"))) {
-    uploadAreaSRT.innerHTML = `<p style="color:red;">Unsupported file type: ${file.type}</p>`;
-    return;
-  }
-  srtFile = file;
-  uploadAreaSRT.innerHTML = `<p style="color:green;">${file.name} selected</p>`;
-}
-
-fileInputSRT.addEventListener("change", () => {
-  if (fileInputSRT.files.length > 0) {
-    handleSRT(fileInputSRT.files[0]);
-  }
-});
-
-setupDragAndDrop(uploadAreaSRT, handleSRT);
-
-clearSRTBtn.addEventListener("click", () => {
-  srtFile = null;
-  uploadAreaSRT.innerHTML = "Drag to upload SRT file";
-});
-
-/* CONFIRM UPLOAD */
-confirmUploadBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-
-  if (!videoFile || !srtFile) {
-    alert("Please upload both a video and an SRT file!");
+  if (!selectedVideo || !selectedSrt) {
+    statusDiv.textContent = "Please select both a video and an SRT file.";
     return;
   }
 
   const formData = new FormData();
-  formData.append("video", videoFile);
-  formData.append("srt", srtFile);
+  formData.append("video", selectedVideo);
+  formData.append("srt", selectedSrt);
 
-  fetch("http://127.0.0.1:5000/upload", {
-    method: "POST",
-    body: formData
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log("Response:", data);
-      alert(data.message || "Upload completed!");
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      alert("Upload failed!");
+  statusDiv.textContent = "Uploading...";
+
+  try {
+    const response = await fetch("http://localhost:5000/upload", {
+      method: "POST",
+      body: formData,
     });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      statusDiv.textContent = result.message || "Upload successful!";
+      // Redirect to analysis page after 1s
+      setTimeout(() => {
+        window.location.href = "src/analysis.html";
+      }, 1000);
+    } else {
+      statusDiv.textContent = `Upload failed: ${result.error || response.statusText}`;
+    }
+
+    
+  } catch (error) {
+    console.error(error);
+    statusDiv.textContent = "Error uploading files. Check server.";
+  }
+});
+
+// Clear button
+clearBtn.addEventListener("click", () => {
+  selectedVideo = null;
+  selectedSrt = null;
+  videoInput.value = "";
+  srtInput.value = "";
+  updateStatus();
 });

@@ -26,9 +26,38 @@
       <div class="card">INFO</div>
       <div class="card">INFO</div>
     </div>
-    <div class="card">
-      RECENT DETECTION
+    <div class="card" id="recent-detection">
+      <h3>RECENT DETECTIONS</h3>
+      <ul id="detection-list"></ul>
     </div>
   </div>
+
+  <script>
+    async function loadDetections() {
+      try {
+        const response = await fetch("http://127.0.0.1:5000/detections");
+        const data = await response.json();
+
+        const list = document.getElementById("detection-list");
+        list.innerHTML = "";
+
+        data.detections.forEach(det => {
+          const li = document.createElement("li");
+
+          // clickable link to analysis.html
+          const link = document.createElement("a");
+          link.href = "analysis.html?detection=" + encodeURIComponent(det);
+          link.textContent = det;
+
+          li.appendChild(link);
+          list.appendChild(li);
+        });
+      } catch (error) {
+        console.error("Error loading detections:", error);
+      }
+    }
+
+    loadDetections();
+  </script>
 </body>
 </html>

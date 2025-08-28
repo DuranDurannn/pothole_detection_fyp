@@ -3,17 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upload - Pothole Detection</title>
+  <title>Analysis - Pothole Detection</title>
   <link rel="stylesheet" href="styles/global.css">
   <link rel="stylesheet" href="components/Sidebar/sidebar.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin="">
+  </script>
 </head>
-<body>
+<body class="analysis-page">
   <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
     <h2>POTHOLE DETECTION</h2>
     <div class="menu">
       <button onclick="location.href='dashboard.html'"><span>Dashboard</span></button>
-      <button onclick="location.href='upload.html'" class="active"><span>Upload</span></button>
+      <button onclick="location.href='upload.html'"><span>Upload</span></button>
       <button onclick="location.href='history.html'"><span>History</span></button>
     </div>
   </div>
@@ -21,6 +28,36 @@
   <!-- Main Content -->
   <div class="main">
     <h1>Analysis</h1>
+
+    <div class="analysis-container">
+      <!-- Left side: video + map -->
+      <div class="left-section">
+        <div>
+          <h2>Map</h2>
+          <div id="map" style="height: 400px; margin-bottom:20px;"></div>
+        </div>
+        <div>
+          <h2>Video</h2>
+          <video id="analysis-video" controls>
+            <source id="video-source" src="" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+
+      <!-- Right side: list -->
+      <div class="list-section">
+        <h2>List</h2>
+        <ul id="pothole-list">
+          <li data-lat="3.139" data-lng="101.6869">Pothole #1 - GPS (3.139, 101.6869)</li>
+          <li data-lat="3.145" data-lng="101.6900">Pothole #2 - GPS (3.145, 101.6900)</li>
+        </ul>
+      </div>
+    </div>
   </div>
+
+  <!-- Initialize Leaflet -->
+  <script src="components/Map/map.js"></script>
+  <script src ="js/analysis.js"></script>
 </body>
 </html>
