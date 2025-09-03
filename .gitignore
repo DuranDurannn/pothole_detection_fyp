@@ -67,6 +67,9 @@ Desktop.ini
 *.txt
 *.srt
 
+# Model
+*.pt
+
 # Files Directory
 *Predictions/
 *uploads_video/

@@ -6,6 +6,7 @@
   <title>Analysis - Pothole Detection</title>
   <link rel="stylesheet" href="styles/global.css">
   <link rel="stylesheet" href="components/Sidebar/sidebar.css">
+  <link rel="stylesheet" href="styles/detection_list.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""/>
@@ -48,7 +49,7 @@
       <!-- Right side: list -->
       <div class="list-section">
         <h2>List</h2>
-        <ul id="pothole-list">
+        <ul id="detection-list">
           <li data-lat="3.139" data-lng="101.6869">Pothole #1 - GPS (3.139, 101.6869)</li>
           <li data-lat="3.145" data-lng="101.6900">Pothole #2 - GPS (3.145, 101.6900)</li>
         </ul>
@@ -57,7 +58,6 @@
   </div>
 
   <!-- Initialize Leaflet -->
-  <script src="components/Map/map.js"></script>
   <script src ="js/analysis.js"></script>
 </body>
 </html>

@@ -3,8 +3,8 @@ from flask_cors import CORS
 import os
 import pathlib
 
-from inference import run_inference
-from utils import srt_to_csv
+from inference import run_inference, best_detections_by_second
+from utils import srt_to_csv, csv_to_json, convert_with_original, geo_detection_merger
 
 app = Flask(__name__)
 CORS(app)
@@ -12,7 +12,6 @@ CORS(app)
 UPLOAD_FOLDER = "uploads_video"
 PREDICTION_FOLDER = "backend/Predictions"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 
 @app.route('/upload', methods=['POST'])
 def upload_and_infer():
@@ -36,9 +35,27 @@ def upload_and_infer():
     srt_path = os.path.join(upload_subfolder, srt_filename)
     srt_file.save(srt_path)
 
-    file_dir = run_inference(video_path, output_dir=PREDICTION_FOLDER)
+    # Run detection
+    file_dir, avi_dir = run_inference(video_path, output_dir=PREDICTION_FOLDER)
+    print("THE AVI", avi_dir)
 
-    srt_to_csv(input_file=srt_path, output_file=os.path.join(file_dir, f"{video_stem}.csv"))
+    # File conversion from srt to csv to json
+    srt_to_csv(input_file=srt_path, output_file=os.path.join(file_dir, "geo.csv"))
+    print("SRT to CSV conversion completed.")
+
+    csv_to_json(input_file=os.path.join(file_dir, "geo.csv"),
+                output_file=os.path.join(file_dir, "geo.json"))
+    print("CSV to JSON conversion completed.")
+
+    best_detections_by_second(video_path, os.path.join(file_dir, "results.json"),
+                                output_file=os.path.join(file_dir, "best_detections.json"))
+    
+    # Convert AVI → MP4 using ffmpeg
+    convert_with_original(avi_dir, os.path.normpath(video_path), os.path.join(file_dir, "output.mp4"))
+
+    geo_detection_merger(geo_file=os.path.join(file_dir, "geo.json"),
+                         best_detections_file=os.path.join(file_dir, "best_detections.json"),
+                         output_file=os.path.join(file_dir, "merged.json"))
 
     return jsonify({
         'message': 'Upload and inference completed successfully',

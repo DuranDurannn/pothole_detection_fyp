@@ -1,0 +1,58 @@
+/* Container for the list */
+.list-section {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Heading inside list section */
+.list-section h2 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 18px;
+  color: #222;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+/* The list itself */
+#detection-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: 700px; /* adjust depending on your layout */
+}
+
+/* Each list item */
+#detection-list li {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 15px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+  border-radius: 8px;
+  margin: 4px 0;
+}
+
+/* Remove last border */
+#detection-list li:last-child {
+  border-bottom: none;
+}
+
+/* Hover effect */
+#detection-list li:hover {
+  background: #eaf4ff;
+  transform: translateX(4px);
+}
+
+/* Small location marker icon */
+#detection-list li::before {
+  content: "📍 ";
+}
