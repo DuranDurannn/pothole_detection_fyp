@@ -24,13 +24,17 @@
   overflow-y: auto;
 }
 
-/* Each detection row */
+/* Detection list row - flex to align link + delete button */
 #detection-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin: 6px 0;
 }
 
+/* Link fills the row except the button */
 #detection-list a {
-  display: block;
+  flex: 1;
   padding: 10px 14px;
   background: #f9fafb;
   border-radius: 8px;
@@ -59,4 +63,26 @@
 #detection-list::-webkit-scrollbar-thumb {
   background: #ccc;
   border-radius: 6px;
+}
+
+/* Delete button style */
+.delete-btn {
+  margin-left: 8px;
+  background: #ffeaea;
+  border: none;
+  border-radius: 8px;
+  color: #d9534f;
+  font-size: 14px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+/* Hover + active effect for delete */
+.delete-btn:hover {
+  background: #ffcccc;
+  transform: scale(1.05);
+}
+.delete-btn:active {
+  background: #ffb3b3;
 }

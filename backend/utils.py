@@ -1,3 +1,4 @@
+from collections import Counter
 import datetime
 import json
 import os
@@ -5,12 +6,17 @@ import re
 import csv
 import subprocess
 
-def srt_to_csv(input_file, output_file):
+def parse_time_to_seconds(time_str):
+    # Example format: "00:00:00.033"
+    t = datetime.datetime.strptime(time_str, "%H:%M:%S.%f")
+    return t.hour * 3600 + t.minute * 60 + t.second + t.microsecond / 1e6
+
+def srt_to_json(input_file, output_file):
     pattern_time = re.compile(r"(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})")
     pattern_gps = re.compile(r"\[latitude:\s*(-?\d+\.\d+)\]\s*\[longitude:\s*(-?\d+\.\d+)\]\s*\[rel_alt:\s*(-?\d+\.\d+)")
     pattern_frame = re.compile(r"FrameCnt:\s*(\d+)")
 
-    rows = []
+    data = []
     with open(input_file, "r", encoding="utf-8") as f:
         lines = f.readlines()
 
@@ -19,11 +25,11 @@ def srt_to_csv(input_file, output_file):
         if time_match:
             time_start = time_match.group(1).replace(",", ".")
             time_end = time_match.group(2).replace(",", ".")
-            
-            # look for frame info in the next lines
+
+            # look for frame info and GPS in following lines
             frame_match = None
             gps_match = None
-            for j in range(1, 4):  # look a few lines ahead
+            for j in range(1, 4):  # check up to 3 lines ahead
                 if i + j < len(lines):
                     if not frame_match:
                         frame_match = pattern_frame.search(lines[i+j])
@@ -32,38 +38,24 @@ def srt_to_csv(input_file, output_file):
 
             if gps_match and frame_match:
                 lat, lon, alt = gps_match.groups()
-                frame = frame_match.group(1)
-                rows.append([frame, time_start, time_end, lon, lat, alt])
+                frame = int(frame_match.group(1))
 
-    # Write to CSV
-    with open(output_file, "w", newline="", encoding="utf-8") as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(["frame", "time_start", "time_end", "GPS_lon", "GPS_lat", "GPS_alt"])
-        writer.writerows(rows)
+                entry = {
+                    "frame": frame,
+                    "time_start": time_start,
+                    "time_end": time_end,
+                    "GPS_lon": float(lon),
+                    "GPS_lat": float(lat),
+                    "GPS_alt": float(alt),
+                    "seconds": parse_time_to_seconds(time_start)
+                }
+                data.append(entry)
 
-def parse_time_to_seconds(time_str):
-    # Example format: "00:00:00.033"
-    t = datetime.datetime.strptime(time_str, "%H:%M:%S.%f")
-    return t.hour * 3600 + t.minute * 60 + t.second + t.microsecond / 1e6
-
-def csv_to_json(input_file, output_file):
-    data = []
-    with open(input_file, mode="r", newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            # Convert numeric values
-            row["frame"] = int(row["frame"])
-            row["GPS_lon"] = float(row["GPS_lon"])
-            row["GPS_lat"] = float(row["GPS_lat"])
-            row["GPS_alt"] = float(row["GPS_alt"])  # keep float in case it's not integer
-
-            # Convert time_start into seconds
-            row["seconds"] = parse_time_to_seconds(row["time_start"])
-
-            data.append(row)
-
+    # Save as JSON
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
+
+    print(f"Converted {input_file} → {output_file} ({len(data)} records)")
     
 def get_video_info(mp4_file):
     try:
@@ -154,3 +146,14 @@ def geo_detection_merger(geo_file, best_detections_file, output_file):
     # Save merged JSON
     with open(os.path.join(output_file), "w") as f:
         json.dump(merged, f, indent=2)
+
+def get_count(detection_file, output_file):
+    # Load JSON
+    with open(detection_file, "r") as f:
+        data = json.load(f)
+
+    # Count detections
+    counter = Counter()
+    for sec_data in data:
+        for det in sec_data["best_detections"]:
+            counter[det["name"]] += 1

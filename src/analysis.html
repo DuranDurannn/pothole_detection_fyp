@@ -14,50 +14,71 @@
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin="">
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="analysis-page">
   <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
     <h2>POTHOLE DETECTION</h2>
     <div class="menu">
-      <button onclick="location.href='dashboard.html'"><span>Dashboard</span></button>
+      <button onclick="location.href='dashboard.html'"><span>Home</span></button>
       <button onclick="location.href='upload.html'"><span>Upload</span></button>
-      <button onclick="location.href='history.html'"><span>History</span></button>
     </div>
   </div>
 
-  <!-- Main Content -->
+  <!-- Main -->
   <div class="main">
-    <h1>Analysis</h1>
-
-    <div class="analysis-container">
-      <!-- Left side: video + map -->
-      <div class="left-section">
-        <div>
-          <h2>Map</h2>
-          <div id="map" style="height: 400px; margin-bottom:20px;"></div>
+    <h1 id="page-title"></h1>
+    <div class="grid-layout">
+      
+      <!-- Map + Video Tabs -->
+      <div class="map-video box">
+        <h2>Map / Video</h2>
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="tab-button active" data-target="map">Map</button>
+          <button class="tab-button" data-target="video">Video</button>
+          <label>
+            <input type="checkbox" id="toggle-path" checked>
+            Show Flight Path
+          </label>
+          <label>
+            <input type="checkbox" id="toggle-startend" checked>
+              Show Start/End
+            </label>
         </div>
-        <div>
-          <h2>Video</h2>
-          <video id="analysis-video" controls>
-            <source id="video-source" src="" type="video/mp4">
-            Your browser does not support the video tag.
-          </video>
+
+        <!-- Tab content -->
+        <div class="tab-content">
+          <div id="map-tab" class="tab-panel active">
+            <div id="map"></div>
+          </div>
+          <div id="video-tab" class="tab-panel">
+            <video id="analysis-video" controls>
+              <source id="video-source" src="" type="video/mp4">
+            </video>
+          </div>
         </div>
       </div>
 
-      <!-- Right side: list -->
-      <div class="list-section">
-        <h2>List</h2>
+      <!-- Detection List -->
+      <div class="list box">
+        <h2>List of Detection</h2>
         <ul id="detection-list">
-          <li data-lat="3.139" data-lng="101.6869">Pothole #1 - GPS (3.139, 101.6869)</li>
-          <li data-lat="3.145" data-lng="101.6900">Pothole #2 - GPS (3.145, 101.6900)</li>
+          <li>Pothole #1 - GPS (3.139, 101.6869)</li>
+          <li>Pothole #2 - GPS (3.145, 101.6900)</li>
         </ul>
+      </div>
+
+      <!-- Graph -->
+      <div class="graph box">
+        <h2>Graph</h2>
+        <canvas id="detectionChart"></canvas>
       </div>
     </div>
   </div>
 
   <!-- Initialize Leaflet -->
-  <script src ="js/analysis.js"></script>
+  <script src="js/analysis.js"></script>
 </body>
 </html>

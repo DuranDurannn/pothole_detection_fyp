@@ -50,15 +50,15 @@ uploadBtn.addEventListener("click", async (e) => {
 
     if (response.ok) {
       statusDiv.textContent = result.message || "Upload successful!";
+      console.log("ID", result.detectionId);
       // Redirect to analysis page after 1s
       setTimeout(() => {
-        window.location.href = "src/analysis.html";
-      }, 1000);
+        window.location.href = "analysis.html?detection=" + result.detectionId;
+      }, 3000);
     } else {
       statusDiv.textContent = `Upload failed: ${result.error || response.statusText}`;
     }
 
-    
   } catch (error) {
     console.error(error);
     statusDiv.textContent = "Error uploading files. Check server.";

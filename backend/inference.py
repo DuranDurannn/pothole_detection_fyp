@@ -8,13 +8,12 @@ import subprocess
 from utils import get_video_info
 
 # Load YOLO model once
-model = YOLO("backend/Model/yolov11s_720.pt")
+model = YOLO("backend/Model/yolo11s_new.pt")
 
 def run_inference(video_path, output_dir):
     """
     Run YOLO inference on uploaded video and save results.
     Save results.json in the same folder as the output video.
-    Convert YOLO's AVI output to MP4 for web compatibility.
     """
     results = model.predict(
         source=video_path,
@@ -24,8 +23,9 @@ def run_inference(video_path, output_dir):
         stream=True,
         project=output_dir,
         name="predict",
-        conf=0.45,
-        iou=0.35
+        conf=0.35,
+        iou=0.4,
+        show_conf=True
     )
 
     CLASS_NAMES = [
@@ -34,13 +34,11 @@ def run_inference(video_path, output_dir):
         "longitudinal_crack",
         "oblique_crack",
         "pothole",
-        "repair"
     ]
 
     frame_id = 0
     save_dir = None
     avi_file = None
-    mp4_file = None
     all_results = []  # collect detections
 
     for i, result in enumerate(results):
@@ -51,8 +49,6 @@ def run_inference(video_path, output_dir):
             for file in os.listdir(save_dir):
                 if file.endswith(".avi"):
                     avi_file = os.path.join(save_dir, file)
-                    # Force final filename to "output.mp4"
-                    mp4_file = os.path.join(save_dir, "output.mp4")
 
         frame_id += 1
         frame_data = {"frame": frame_id, "detections": []}
@@ -77,26 +73,7 @@ def run_inference(video_path, output_dir):
             json.dump(all_results, f, indent=4, sort_keys=False)
         print(f"Results saved to {output_json}")
 
-    """
-    if avi_file and mp4_file:
-        try:
-            subprocess.run([
-                "ffmpeg", "-y", "-i", avi_file,
-                "-filter:v", "setpts=0.967*PTS",
-                "-c:v", "libx264", "-preset", "fast", "-crf", "23",
-                "-c:a", "aac", "-b:a", "128k",
-                mp4_file
-            ], check=True)
-            print(f"Converted to {mp4_file}")
-
-            if os.path.exists(avi_file):
-                os.remove(avi_file)
-                print(f"Deleted {avi_file}")
-        except Exception as e:
-            print(f"Error converting to mp4: {e}")
-    """
-
-    return save_dir, avi_file
+    return save_dir, avi_file, os.path.basename(os.path.dirname(save_dir))
 
 def best_detections_by_second(video_file, result_file, output_file):
     video_info = get_video_info(video_file)
@@ -105,6 +82,14 @@ def best_detections_by_second(video_file, result_file, output_file):
 
     with open(result_file, "r") as f:
         data = json.load(f)
+
+    conf_thresholds = {
+        0: 0.35,  # transverse_crack
+        1: 0.35,  # alligator_crack
+        2: 0.35,  # longitudinal_crack
+        3: 0.35,  # oblique_crack
+        4: 0.15   # pothole → lower threshold
+    }
 
     grouped = defaultdict(list)
     for frame in data:
@@ -121,6 +106,13 @@ def best_detections_by_second(video_file, result_file, output_file):
             for det in frame["detections"]:
                 cls = det["class"]
                 conf = det["confidence"]
+
+                # Apply per-class confidence filter
+                min_conf = conf_thresholds.get(cls, 0.25)
+                if conf < min_conf:
+                    continue
+
+                # Keep the best detection per class
                 if cls not in best_by_class or conf > best_by_class[cls]["confidence"]:
                     best_by_class[cls] = {
                         **det,

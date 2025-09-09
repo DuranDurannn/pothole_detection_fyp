@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,25 +10,21 @@
   <link rel="stylesheet" href="components/Card/card.css">
   <link rel="stylesheet" href="styles/dashboard.css">
 </head>
+
 <body>
   <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
     <h2>POTHOLE DETECTION</h2>
     <div class="menu">
-      <button onclick="location.href='dashboard.html'" class="active"><span>Dashboard</span></button>
+      <button onclick="location.href='dashboard.html'" class="active"><span>Home</span></button>
       <button onclick="location.href='upload.html'"><span>Upload</span></button>
-      <button onclick="location.href='history.html'"><span>History</span></button>
     </div>
   </div>
 
   <!-- Main Content -->
   <div class="main">
-    <div class="topbar">
-    </div>
-    <div class="card" id="recent-detection">
-      <h3>RECENT DETECTIONS</h3>
-      <ul id="detection-list"></ul>
-    </div>
+    <h1>All Detections</h1>
+    <ul id="detection-list"></ul>
   </div>
 
   <script>
@@ -42,16 +39,43 @@
         data.detections.forEach(det => {
           const li = document.createElement("li");
 
-          // clickable link to analysis.html
+          // clickable link
           const link = document.createElement("a");
           link.href = "analysis.html?detection=" + encodeURIComponent(det);
           link.textContent = det;
 
+          // delete button
+          const delBtn = document.createElement("button");
+          delBtn.textContent = "❌";
+          delBtn.classList.add("delete-btn");
+          delBtn.onclick = async () => {
+            if (confirm(`Delete detection "${det}"?`)) {
+              await deleteDetection(det);
+              li.remove(); // remove from UI
+            }
+          };
+
           li.appendChild(link);
+          li.appendChild(delBtn);
           list.appendChild(li);
         });
       } catch (error) {
         console.error("Error loading detections:", error);
+      }
+    }
+
+    async function deleteDetection(det) {
+      try {
+        const response = await fetch(`http://127.0.0.1:5000/detections/${encodeURIComponent(det)}`, {
+          method: "DELETE",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to delete detection");
+        }
+      } catch (error) {
+        console.error("Error deleting detection:", error);
+        alert("Failed to delete detection");
       }
     }
 

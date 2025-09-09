@@ -4,7 +4,7 @@ import os
 import pathlib
 
 from inference import run_inference, best_detections_by_second
-from utils import srt_to_csv, csv_to_json, convert_with_original, geo_detection_merger
+from utils import srt_to_json, convert_with_original, geo_detection_merger, get_count
 
 app = Flask(__name__)
 CORS(app)
@@ -36,16 +36,10 @@ def upload_and_infer():
     srt_file.save(srt_path)
 
     # Run detection
-    file_dir, avi_dir = run_inference(video_path, output_dir=PREDICTION_FOLDER)
+    file_dir, avi_dir, predict_name = run_inference(video_path, output_dir=PREDICTION_FOLDER)
     print("THE AVI", avi_dir)
 
-    # File conversion from srt to csv to json
-    srt_to_csv(input_file=srt_path, output_file=os.path.join(file_dir, "geo.csv"))
-    print("SRT to CSV conversion completed.")
-
-    csv_to_json(input_file=os.path.join(file_dir, "geo.csv"),
-                output_file=os.path.join(file_dir, "geo.json"))
-    print("CSV to JSON conversion completed.")
+    srt_to_json(input_file=srt_path, output_file=os.path.join(file_dir, "geo.json"))
 
     best_detections_by_second(video_path, os.path.join(file_dir, "results.json"),
                                 output_file=os.path.join(file_dir, "best_detections.json"))
@@ -57,18 +51,38 @@ def upload_and_infer():
                          best_detections_file=os.path.join(file_dir, "best_detections.json"),
                          output_file=os.path.join(file_dir, "merged.json"))
 
+    get_count(detection_file=os.path.join(file_dir, "best_detections.json"),
+              output_file=os.path.join(file_dir, "count.json"))
+
     return jsonify({
         'message': 'Upload and inference completed successfully',
         'uploaded_file': video_file.filename,
-        'prediction_path': os.path.join(PREDICTION_FOLDER, "detection")
+        'prediction_path': os.path.join(PREDICTION_FOLDER, "detection"),
+        'detectionId': file_dir.split(os.path.sep)[-1]
     }), 200
 
-@app.route("/detections")
+@app.route("/detections", methods=["GET"])
 def detections():
     base_folder = "backend/Predictions"
     # Get only folders inside Predictions
     folders = [d for d in os.listdir(base_folder) if os.path.isdir(os.path.join(base_folder, d))]
     return jsonify({"detections": folders})
+
+@app.route("/detections/<detection_id>", methods=["DELETE"])
+def delete_detection(detection_id):
+    base_folder = "backend/Predictions"
+    detection_path = os.path.join(base_folder, detection_id)
+
+    if not os.path.exists(detection_path):
+        return jsonify({"error": f"Detection '{detection_id}' not found"}), 404
+
+    try:
+        # Delete folder and all its contents
+        import shutil
+        shutil.rmtree(detection_path)
+        return jsonify({"message": f"Detection '{detection_id}' deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to delete detection: {str(e)}"}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
