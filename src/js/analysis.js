@@ -8,6 +8,7 @@ window.activeMarker = null;
 let polyline = null;
 let startMarker = null;
 let endMarker = null;
+const activeListMarkers = []; // store markers added by list clicks
 
 // Custom icons
 const greenIcon = new L.Icon({
@@ -28,15 +29,12 @@ const redIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-
 if (folder) {
   document.querySelector("h1").textContent = folder;
 
   // Video setup with cache-busting
   const videoSource = document.getElementById("video-source");
   videoSource.src = `../backend/Predictions/${folder}/output.mp4?t=${Date.now()}`;
-  console.log("Video source set to:", videoSource.src);
-
   const video = document.getElementById("analysis-video");
   video.load();
 
@@ -52,15 +50,13 @@ if (folder) {
   fetch(mergedSource)
     .then(r => r.json())
     .then(mergedData => {
-      console.log("Merged data (fresh):", mergedData);
-
       const listContainer = document.getElementById("detection-list");
       listContainer.innerHTML = "";
 
       const detectionCounts = {};
       const flightPath = [];
+      const classClusters = {};
 
-      // Process detections
       mergedData.forEach((entry) => {
         const { GPS_lat, GPS_lon, GPS_alt, seconds, frame, detections } = entry;
 
@@ -75,8 +71,19 @@ if (folder) {
           const defectName = det.name || "Unknown defect";
           detectionCounts[defectName] = (detectionCounts[defectName] || 0) + 1;
 
-          const videoTime = seconds;
+          // Prepare cluster holder
+          if (!classClusters[defectName]) {
+            classClusters[defectName] = {
+              markers: [],
+              group: L.markerClusterGroup({
+                showCoverageOnHover: true,
+                spiderfyOnMaxZoom: false,
+                disableClusteringAtZoom: 36
+              })
+            };
+          }
 
+          const videoTime = seconds;
           const popupContent = `
             <b>${defectName}</b><br>
             Frame: ${frame}<br>
@@ -84,6 +91,15 @@ if (folder) {
             Lat: ${GPS_lat}, Lon: ${GPS_lon}, Alt: ${GPS_alt}<br>
           `;
 
+          const marker = L.marker([GPS_lat, GPS_lon]).bindPopup(popupContent);
+          marker.on("click", () => {
+            video.currentTime = videoTime;
+            video.pause();
+          });
+
+          classClusters[defectName].markers.push(marker);
+
+          // Add to list
           const li = document.createElement("li");
           li.textContent = `${defectName} - GPS (${GPS_lat}, ${GPS_lon})`;
           li.dataset.lat = GPS_lat;
@@ -91,10 +107,16 @@ if (folder) {
           li.dataset.seconds = videoTime;
           li.dataset.popup = popupContent;
 
-          // On click → jump to video + show marker
           li.addEventListener("click", () => {
             video.currentTime = videoTime;
             video.pause();
+
+            activeListMarkers.forEach(m => window.mapInstance.removeLayer(m));
+            activeListMarkers.length = 0;
+
+            const singleMarker = L.marker([GPS_lat, GPS_lon]).bindPopup(popupContent);
+            singleMarker.addTo(window.mapInstance).openPopup();
+            activeListMarkers.push(singleMarker);
 
             if (window.activeMarker) {
               window.mapInstance.removeLayer(window.activeMarker);
@@ -105,11 +127,49 @@ if (folder) {
 
             window.mapInstance.setView([GPS_lat, GPS_lon], 20);
             setTimeout(() => window.activeMarker.openPopup(), 200);
+
+            window.mapInstance.setView([GPS_lat, GPS_lon], 20);
           });
 
           listContainer.appendChild(li);
         });
       });
+
+      const baseLayers = {};   
+      const overlays = {};      
+
+      const emptyLayer = L.layerGroup();
+      baseLayers["Show Nothing"] = emptyLayer;
+
+      Object.entries(classClusters).forEach(([className, { markers, group }]) => {
+        // Add markers to cluster group
+        if (markers.length > 1) {
+          group.addLayers(markers);
+
+          group.on("clusterclick", (e) => {
+            const clusterMarkers = e.layer.getAllChildMarkers();
+            const classCount = {};
+            clusterMarkers.forEach(m => {
+              const name = m.getPopup().getContent().match(/<b>(.*?)<\/b>/)[1];
+              classCount[name] = (classCount[name] || 0) + 1;
+            });
+
+            let popupHtml = "<b>Cluster Details</b><br>";
+            Object.entries(classCount).forEach(([cls, count]) => {
+              popupHtml += `${cls}: ${count}<br>`;
+            });
+
+            e.layer.bindPopup(popupHtml).openPopup();
+          });
+        }
+
+        // Put clusters into baseLayers (radio buttons)
+        baseLayers[`${className} (Clusters)`] = group;
+      });
+
+      emptyLayer.addTo(window.mapInstance);
+
+      L.control.layers(baseLayers, overlays, { collapsed: false }).addTo(window.mapInstance);
 
       // Draw flight path
       if (flightPath.length > 1) {
@@ -132,7 +192,7 @@ if (folder) {
           .addTo(window.mapInstance);
       }
 
-      // Toggle switch for path
+      // Toggle path
       const togglePath = document.getElementById("toggle-path");
       togglePath.addEventListener("change", () => {
         if (togglePath.checked) {
@@ -146,7 +206,19 @@ if (folder) {
         }
       });
 
-      // Draw chart
+      // Toggle start/end markers
+      const toggleStartEnd = document.getElementById("toggle-startend");
+      toggleStartEnd.addEventListener("change", () => {
+        if (toggleStartEnd.checked) {
+          if (startMarker && !window.mapInstance.hasLayer(startMarker)) startMarker.addTo(window.mapInstance);
+          if (endMarker && !window.mapInstance.hasLayer(endMarker)) endMarker.addTo(window.mapInstance);
+        } else {
+          if (startMarker && window.mapInstance.hasLayer(startMarker)) window.mapInstance.removeLayer(startMarker);
+          if (endMarker && window.mapInstance.hasLayer(endMarker)) window.mapInstance.removeLayer(endMarker);
+        }
+      });
+
+      // Detection chart
       const ctx = document.getElementById("detectionChart").getContext("2d");
       new Chart(ctx, {
         type: "bar",
@@ -201,23 +273,4 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
-});
-
-const toggleStartEnd = document.getElementById("toggle-startend");
-toggleStartEnd.addEventListener("change", () => {
-  if (toggleStartEnd.checked) {
-    if (startMarker && !window.mapInstance.hasLayer(startMarker)) {
-      startMarker.addTo(window.mapInstance);
-    }
-    if (endMarker && !window.mapInstance.hasLayer(endMarker)) {
-      endMarker.addTo(window.mapInstance);
-    }
-  } else {
-    if (startMarker && window.mapInstance.hasLayer(startMarker)) {
-      window.mapInstance.removeLayer(startMarker);
-    }
-    if (endMarker && window.mapInstance.hasLayer(endMarker)) {
-      window.mapInstance.removeLayer(endMarker);
-    }
-  }
 });

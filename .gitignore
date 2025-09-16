@@ -68,7 +68,7 @@ Desktop.ini
 *.srt
 
 # Model
-*.pt
+*backend\Model\test
 
 # Files Directory
 *Predictions/

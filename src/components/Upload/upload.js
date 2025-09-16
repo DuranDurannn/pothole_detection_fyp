@@ -9,13 +9,27 @@ let selectedSrt = null;
 
 // File selection
 videoInput.addEventListener("change", () => {
-  selectedVideo = videoInput.files[0];
-  updateStatus();
+  const file = videoInput.files[0];
+  if (file && !file.name.toLowerCase().endsWith(".mp4")) {
+    statusDiv.textContent = "Wrong type of file. Please select an MP4 video.";
+    videoInput.value = "";
+    selectedVideo = null;
+  } else {
+    selectedVideo = file;
+    updateStatus();
+  }
 });
 
 srtInput.addEventListener("change", () => {
-  selectedSrt = srtInput.files[0];
-  updateStatus();
+  const file = srtInput.files[0];
+  if (file && !file.name.toLowerCase().endsWith(".srt")) {
+    statusDiv.textContent = "Wrong type of file. Please select an SRT file.";
+    srtInput.value = "";
+    selectedSrt = null;
+  } else {
+    selectedSrt = file;
+    updateStatus();
+  }
 });
 
 function updateStatus() {
@@ -51,17 +65,19 @@ uploadBtn.addEventListener("click", async (e) => {
     if (response.ok) {
       statusDiv.textContent = result.message || "Upload successful!";
       console.log("ID", result.detectionId);
-      // Redirect to analysis page after 1s
+      // Redirect to analysis page after 3s
       setTimeout(() => {
         window.location.href = "analysis.html?detection=" + result.detectionId;
       }, 3000);
     } else {
       statusDiv.textContent = `Upload failed: ${result.error || response.statusText}`;
+      alert(`Upload failed: ${result.error || response.statusText}`);
     }
 
   } catch (error) {
     console.error(error);
     statusDiv.textContent = "Error uploading files. Check server.";
+    alert("Error uploading files. Check server.");
   }
 });
 

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leaflet Clusters + Heatmap</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <!-- Marker Cluster plugin -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
+  <!-- Heatmap plugin -->
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+  <style>
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script>
+    // Initialize map
+    const map = L.map("map").setView([3.139, 101.6869], 12);
+
+    // Base layer
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(map);
+
+    // Sample data (Kuala Lumpur-ish)
+    const points = [
+      [3.139, 101.6869],
+      [3.140, 101.689],
+      [3.138, 101.688],
+      [3.145, 101.690],
+      [3.136, 101.684],
+      [3.142, 101.687]
+    ];
+
+    // --- Marker Cluster Layer ---
+    const markers = L.markerClusterGroup();
+    points.forEach(p => {
+      markers.addLayer(L.marker(p).bindPopup("Marker at " + p));
+    });
+
+    // --- Heatmap Layer ---
+    const heat = L.heatLayer(points, {
+      radius: 25,
+      blur: 15,
+      maxZoom: 17,
+      gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'}
+    });
+
+    // --- Layer Control ---
+    const overlays = {
+      "Clusters": markers,
+      "Heatmap": heat
+    };
+
+    L.control.layers(null, overlays, {collapsed: false}).addTo(map);
+
+    // Add clusters by default
+    map.addLayer(markers);
+  </script>
+</body>
+</html>
